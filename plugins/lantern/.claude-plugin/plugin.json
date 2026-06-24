@@ -1,0 +1,12 @@
+{
+  "name": "lantern",
+  "description": "Bring Lantern's AI-visibility, citations, product data quality, and website AI-readiness analysis into Claude Code. Pick a brand and ask.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Lantern",
+    "url": "https://lantern.is"
+  },
+  "homepage": "https://lantern.is",
+  "repository": "https://github.com/lanterninc/claude-plugins",
+  "license": "MIT"
+}

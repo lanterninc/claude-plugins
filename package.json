@@ -1,0 +1,23 @@
+{
+  "name": "claude-plugins",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --coverage",
+    "validate": "claude plugin validate . && for d in plugins/*/; do claude plugin validate \"$d\"; done"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@vitest/coverage-v8": "^3.0.0",
+    "eslint": "^9.0.0",
+    "glob": "^11.0.0",
+    "gray-matter": "^4.0.3",
+    "typescript": "^5.6.0",
+    "typescript-eslint": "^8.0.0",
+    "vitest": "^3.0.0",
+    "zod": "^3.23.0"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "lantern",
+  "description": "Lantern's official Claude Code plugin — pull AI-visibility, citations, product data quality, and website AI-readiness data into Claude Code.",
+  "owner": {
+    "name": "Lantern",
+    "url": "https://lantern.is"
+  },
+  "plugins": [
+    {
+      "name": "lantern",
+      "source": "./plugins/lantern",
+      "description": "Pull Lantern AI-visibility, citation, product-quality, and website AI-readiness data into Claude Code."
+    }
+  ]
+}

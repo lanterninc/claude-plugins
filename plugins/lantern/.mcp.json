@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "lantern": {
+      "type": "http",
+      "url": "${LANTERN_MCP_URL:-https://agent.lantern.is/agent/mcp}"
+    }
+  }
+}
