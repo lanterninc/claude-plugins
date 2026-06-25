@@ -39,11 +39,14 @@ describe('lantern-analyst subagent', () => {
       it('GIVEN the subagent frontmatter WHEN tools read THEN it grants the MCP wildcard for the .mcp.json server key', () => {
         const { data } = loadFrontmatter(agentPath(plugin));
         const fm = AgentFrontmatterSchema.parse(data);
-        // Couple the wildcard to the ACTUAL .mcp.json server key, so renaming the
-        // server (mcp-config) without updating the agent breaks this test.
+        // Couple the wildcard to the ACTUAL runtime tool prefix. Claude Code
+        // namespaces a plugin's MCP server as `plugin_<pluginName>_<serverKey>`,
+        // so the exposed tools are `mcp__plugin_<plugin>_<serverKey>__<tool>`.
+        // Renaming the plugin or the .mcp.json server key without updating the
+        // agent's `tools:` glob breaks this test.
         const mcp = McpConfigSchema.parse(loadMcpConfig(plugin));
         const serverKey = Object.keys(mcp.mcpServers)[0];
-        const expectedWildcard = `mcp__${serverKey}__*`;
+        const expectedWildcard = `mcp__plugin_${plugin}_${serverKey}__*`;
         expect(toolEntries(fm.tools)).toContain(expectedWildcard);
       });
 
