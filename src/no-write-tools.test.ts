@@ -5,8 +5,8 @@ import {
   PLUGINS,
   FORBIDDEN_TOOL_PATTERNS,
   repoRoot,
-  listSkillDirs,
-  listCommandFiles,
+  findingsSkillDirs,
+  findingsCommandFiles,
   agentPath,
 } from './repo.js';
 
@@ -16,12 +16,12 @@ function allContentPairs(): Array<{ path: string; content: string }> {
   const root = repoRoot();
   for (const plugin of PLUGINS) {
     // Skills
-    for (const skill of listSkillDirs(plugin)) {
+    for (const skill of findingsSkillDirs(plugin)) {
       const skillPath = join(root, 'plugins', plugin, 'skills', skill, 'SKILL.md');
       pairs.push({ path: skillPath, content: readFileSync(skillPath, 'utf-8') });
     }
     // Commands
-    for (const cmd of listCommandFiles(plugin)) {
+    for (const cmd of findingsCommandFiles(plugin)) {
       const cmdPath = join(root, 'plugins', plugin, 'commands', `${cmd}.md`);
       pairs.push({ path: cmdPath, content: readFileSync(cmdPath, 'utf-8') });
     }
@@ -53,14 +53,14 @@ describe('FORBIDDEN_TOOL_PATTERNS helper coverage', () => {
   });
 
   it('GIVEN text not containing any forbidden pattern WHEN checked THEN no pattern matches', () => {
-    const clean = 'findings.get_brand_scores findings.get_overview';
+    const clean = 'findings.get_brand_overview findings.get_overview_attention';
     for (const pattern of FORBIDDEN_TOOL_PATTERNS) {
       expect(pattern.test(clean)).toBe(false);
     }
   });
 
-  it('GIVEN text containing apply_recommendation WHEN checked THEN the pattern matches', () => {
-    expect(FORBIDDEN_TOOL_PATTERNS.some((p) => p.test('apply_recommendation_now'))).toBe(true);
+  it('GIVEN text containing apply_fix WHEN checked THEN the pattern matches', () => {
+    expect(FORBIDDEN_TOOL_PATTERNS.some((p) => p.test('apply_fix_now'))).toBe(true);
   });
 
   it('GIVEN text containing draft_ WHEN checked THEN the pattern matches', () => {

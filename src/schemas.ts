@@ -57,6 +57,9 @@ const MCP_URL_RE = /^\$\{LANTERN_MCP_URL:-https?:\/\/.+\}$/;
 export const McpServerSchema = z.object({
   type: z.literal('http'),
   url: z.string().regex(MCP_URL_RE, 'url must be the ${LANTERN_MCP_URL:-<default>} form'),
+  // Optional pinned OAuth scopes (RFC 6749 space-separated). When present, the
+  // client requests exactly this set instead of the server's default scope.
+  oauth: z.object({ scopes: z.string().trim().min(1) }).optional(),
 });
 
 export const McpConfigSchema = z.object({

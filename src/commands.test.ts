@@ -4,7 +4,7 @@ import {
   PLUGINS,
   KNOWN_TOOLS,
   repoRoot,
-  listCommandFiles,
+  findingsCommandFiles,
   loadFrontmatter,
   collectToolRefs,
 } from './repo.js';
@@ -12,7 +12,7 @@ import { FrontmatterSchema } from './schemas.js';
 
 describe('command markdown files', () => {
   for (const plugin of PLUGINS) {
-    const commands = listCommandFiles(plugin);
+    const commands = findingsCommandFiles(plugin);
 
     describe(`plugin: ${plugin}`, () => {
       it('GIVEN the commands directory WHEN enumerated THEN at least one command exists', () => {

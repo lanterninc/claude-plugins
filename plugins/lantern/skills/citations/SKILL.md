@@ -7,7 +7,7 @@ description: Use when the user asks which sources, domains, or pages LLMs cite w
 You have Lantern MCP tools (`findings.*`) for citation data.
 
 ## Brand bootstrap (do this first)
-If you don't have the session `accountBrandId`, call `findings.get_visibility_brands` (no args), show brand names, and ask/match. Thread the chosen id into every call.
+If you don't have the session `accountBrandId`, call `account-manager.get_brands` (no args), show brand names, and ask/match. Thread the chosen id into every call.
 
 ## Which tool
 - Citation telemetry for the brand: `findings.get_brand_citation_telemetry` (brand).

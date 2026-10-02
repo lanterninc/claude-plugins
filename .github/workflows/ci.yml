@@ -25,6 +25,6 @@ jobs:
       - name: Test (with coverage)
         run: npm run test
       - name: Install Claude Code
-        run: npm i -g @anthropic-ai/claude-code@2.1.186
+        run: npm i -g @anthropic-ai/claude-code@2.1.201
       - name: Validate plugins
         run: npm run validate

@@ -4,7 +4,7 @@ Run against production (`agent.lantern.is`).
 
 1. **Load:** `claude --plugin-dir ./plugins/lantern` — no load errors; `/help` shows the skills + commands; `/agents` shows `lantern-analyst`.
 2. **OAuth:** `/mcp` → browser opens to the Lantern consent page → log in → pick brand(s) → approve → `/mcp` shows the `lantern` server connected with a tool count of 25.
-3. **Bootstrap:** ask "list my Lantern brands" (or `/lantern:brands`) → `findings.get_visibility_brands` returns real `{id,name}` with **no** brand argument.
+3. **Bootstrap:** ask "list my Lantern brands" (or `/lantern:brands`) → `account-manager.get_brands` returns real `{id,name,slug,domains}` with **no** brand argument.
 4. **Read per area (pick one brand):**
    - `/lantern:visibility <brand>` → real scores/overview.
    - `/lantern:analyze <domain>` → readiness summary (note: domain scores may be null).

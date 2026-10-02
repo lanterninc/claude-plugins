@@ -132,6 +132,32 @@ describe('McpServerSchema', () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it('GIVEN a server with an oauth.scopes string WHEN parsed THEN succeeds', () => {
+    const result = McpServerSchema.safeParse({
+      type: 'http',
+      url: '${LANTERN_MCP_URL:-https://agent.lantern.is/agent/mcp}',
+      oauth: { scopes: 'read:findings' },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('GIVEN a server with no oauth field WHEN parsed THEN still succeeds (oauth optional)', () => {
+    const result = McpServerSchema.safeParse({
+      type: 'http',
+      url: '${LANTERN_MCP_URL:-https://agent.lantern.is/agent/mcp}',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('GIVEN an oauth object with empty scopes WHEN parsed THEN fails', () => {
+    const result = McpServerSchema.safeParse({
+      type: 'http',
+      url: '${LANTERN_MCP_URL:-https://agent.lantern.is/agent/mcp}',
+      oauth: { scopes: '' },
+    });
+    expect(result.success).toBe(false);
+  });
 });
 
 describe('McpConfigSchema', () => {

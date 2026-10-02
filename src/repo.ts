@@ -8,7 +8,8 @@ import matter from 'gray-matter';
 // ---------------------------------------------------------------------------
 
 /**
- * The canonical set of tool names exposed by the Lantern MCP server.
+ * The canonical set of tool names exposed by the Lantern MCP server, as
+ * `<namespace>.<tool>` (namespaces: `findings`, `account-manager`).
  *
  * IMPORTANT: This list MUST be regenerated from the live MCP `tools/list`
  * response at `agent.lantern.is/agent/mcp` whenever tools are added or
@@ -17,15 +18,7 @@ import matter from 'gray-matter';
  * NOT a substitute for pulling the live server list.
  */
 export const KNOWN_TOOLS: ReadonlyArray<string> = [
-  'findings.get_brand_domains',
-  'findings.get_visibility_brands',
-  'findings.get_brand_scores',
-  'findings.get_ai_readiness',
-  'findings.get_readiness_summary',
-  'findings.get_domain_analysis',
-  'findings.get_analysis_history',
-  'findings.get_analysis_diff',
-  'findings.check_analysis_status',
+  'account-manager.get_brands',
   'findings.get_action_queue',
   'findings.get_products',
   'findings.get_product_catalog_summary',
@@ -33,10 +26,9 @@ export const KNOWN_TOOLS: ReadonlyArray<string> = [
   'findings.get_brand_citation_telemetry',
   'findings.explain_citation_telemetry',
   'findings.get_brand_competitor_citations',
-  'findings.get_ai_traffic_data',
+  'findings.get_ai_traffic_insights',
   'findings.get_action_impact',
   'findings.get_action_metadata',
-  'findings.get_overview',
   'findings.get_overview_attention',
   'findings.get_portfolio_overview',
   'findings.get_brand_overview',
@@ -82,7 +74,7 @@ export const COMMANDS: ReadonlyArray<string> = [
 export const FORBIDDEN_TOOL_PATTERNS: ReadonlyArray<RegExp> = [
   /publish_/,
   /edit_website/,
-  /apply_recommendation/,
+  /apply_/,
   /draft_/,
   /ask_lantern/,
 ] as const;
@@ -168,6 +160,46 @@ export function loadFrontmatter(absPath: string): { data: Record<string, unknown
   return { data, body: parsed.content };
 }
 
+// ---------------------------------------------------------------------------
+// Tool-surface partitioning
+// ---------------------------------------------------------------------------
+
+/**
+ * The default tool surface. Artifacts (skills/commands) that do not declare a
+ * `surface:` in their frontmatter belong to this read-only `findings.*` surface,
+ * which the read-only scans (no-write-tools, tool-integrity, skills, commands)
+ * validate against KNOWN_TOOLS. An artifact that declares a DIFFERENT surface is
+ * a separate tool family validated by its own gate and skipped by these scans.
+ *
+ * Keying on the literal 'findings' keeps this shared file token-clean: the names
+ * of any non-default surfaces live only in the (export-excluded) artifacts that
+ * declare them, never here.
+ */
+export const DEFAULT_SURFACE = 'findings';
+
+/** The surface an artifact declares via frontmatter `surface:`; defaults to DEFAULT_SURFACE. */
+export function artifactSurface(frontmatter: Record<string, unknown>): string {
+  const s = frontmatter['surface'];
+  return typeof s === 'string' && s.trim().length > 0 ? s.trim() : DEFAULT_SURFACE;
+}
+
+/** Skill dir names for a plugin that belong to the default (findings) surface. */
+export function findingsSkillDirs(pluginName: string): string[] {
+  return listSkillDirs(pluginName).filter((skill) => {
+    const p = join(repoRoot(), 'plugins', pluginName, 'skills', skill, 'SKILL.md');
+    if (!existsSync(p)) return false;
+    return artifactSurface(loadFrontmatter(p).data) === DEFAULT_SURFACE;
+  });
+}
+
+/** Command basenames for a plugin that belong to the default (findings) surface. */
+export function findingsCommandFiles(pluginName: string): string[] {
+  return listCommandFiles(pluginName).filter((cmd) => {
+    const p = join(repoRoot(), 'plugins', pluginName, 'commands', `${cmd}.md`);
+    return artifactSurface(loadFrontmatter(p).data) === DEFAULT_SURFACE;
+  });
+}
+
 /**
  * Bare-suffix patterns that identify candidate tool references even when the
  * `findings.` namespace prefix is omitted.  Any token starting with one of
@@ -176,21 +208,23 @@ export function loadFrontmatter(absPath: string): { data: Record<string, unknown
  * `findings.<suffix>` form before validation.
  */
 const BARE_TOOL_RE =
-  /\b(get|compare|explain|check)_[a-z][a-z0-9_]*\b/g;
+  /(?<![.\w-])(get|compare|explain|check)_[a-z][a-z0-9_]*\b/g;
 
 /**
- * Collect all `findings.<tool_name>` references from a text blob, including
- * bare shorthand forms such as `get_brand_scores` (without the `findings.`
+ * Collect all `<namespace>.<tool_name>` references from a text blob, including
+ * bare shorthand forms such as `get_brand_overview` (without the `findings.`
  * prefix).  Returns a deduped array of the full dotted names
- * (e.g. `findings.get_visibility_brands`).
+ * (e.g. `account-manager.get_brands`).  Recognised namespaces are `findings`
+ * and `account-manager`; a bare token is always normalised to `findings.`, so
+ * tools in any other namespace must be written with their prefix.
  *
  * Detection rules:
- * 1. Prefixed form: `\bfindings\.[a-z][a-z0-9_]*\b` — end-anchored so
+ * 1. Prefixed form: `\b(findings|account-manager)\.[a-z][a-z0-9_]*\b` — end-anchored so
  *    `findings.getOverview` and `findings.get_overview2` are NOT collapsed
  *    into a known name; any token containing an uppercase letter is dropped.
  * 2. Bare form: tokens matching `(get|compare|explain|check)_[a-z][a-z0-9_]*`
  *    are normalised to `findings.<token>` before inclusion.  This catches
- *    agent-body prose like "`get_brand_scores`" that omits the prefix.
+ *    agent-body prose like "`get_brand_overview`" that omits the prefix.
  *
  * Both detection paths are merged into one deduped set.  A bare typo (e.g.
  * `get_brand_scoers`) will be included and will therefore fail a KNOWN_TOOLS
@@ -203,7 +237,8 @@ export function collectToolRefs(text: string): string[] {
   // The character class [a-z][a-z0-9_]* already prevents any uppercase letter
   // from matching, so camelCase tokens like `findings.getOverview` are rejected
   // at the regex level.
-  const prefixedMatches = text.match(/\bfindings\.[a-z][a-z0-9_]*\b/g) ?? [];
+  const prefixedMatches =
+    text.match(/\b(?:findings|account-manager)\.[a-z][a-z0-9_]*\b/g) ?? [];
   for (const m of prefixedMatches) {
     result.add(m);
   }

@@ -4,7 +4,7 @@ import {
   PLUGINS,
   KNOWN_TOOLS,
   repoRoot,
-  listSkillDirs,
+  findingsSkillDirs,
   loadFrontmatter,
   collectToolRefs,
 } from './repo.js';
@@ -12,7 +12,7 @@ import { FrontmatterSchema } from './schemas.js';
 
 describe('skill SKILL.md files', () => {
   for (const plugin of PLUGINS) {
-    const skills = listSkillDirs(plugin);
+    const skills = findingsSkillDirs(plugin);
 
     describe(`plugin: ${plugin}`, () => {
       it('GIVEN the skill directories WHEN enumerated THEN at least one skill exists', () => {
@@ -53,15 +53,15 @@ describe('skill SKILL.md files', () => {
     });
   }
 
-  // Brand-scoped skills must mention get_visibility_brands
+  // Brand-scoped skills must mention get_brands
   const brandScopedSkills = ['ai-visibility', 'citations', 'product-quality', 'website-analysis', 'competitors'];
 
   for (const plugin of PLUGINS) {
     for (const skill of brandScopedSkills) {
-      it(`GIVEN ${plugin}/${skill}/SKILL.md WHEN body examined THEN it mentions get_visibility_brands`, () => {
+      it(`GIVEN ${plugin}/${skill}/SKILL.md WHEN body examined THEN it mentions get_brands`, () => {
         const skillPath = join(repoRoot(), 'plugins', plugin, 'skills', skill, 'SKILL.md');
         const { body } = loadFrontmatter(skillPath);
-        expect(body).toContain('get_visibility_brands');
+        expect(body).toContain('account-manager.get_brands');
       });
     }
   }

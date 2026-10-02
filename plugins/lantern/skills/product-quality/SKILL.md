@@ -7,7 +7,7 @@ description: Use when the user asks about Shopify product data quality, how comp
 You have Lantern MCP tools (`findings.*`) for product-quality data.
 
 ## Brand bootstrap (do this first)
-If you don't have the session `accountBrandId`, call `findings.get_visibility_brands` (no args), show names, ask/match, and thread the id through.
+If you don't have the session `accountBrandId`, call `account-manager.get_brands` (no args), show names, ask/match, and thread the id through.
 
 ## Which tool
 - Catalog-level summary: `findings.get_product_catalog_summary` (brand).

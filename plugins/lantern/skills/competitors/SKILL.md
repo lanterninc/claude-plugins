@@ -7,7 +7,7 @@ description: Use when the user wants to compare their brand against competitors 
 You have Lantern MCP tools (`findings.*`) for competitive comparison.
 
 ## Brand bootstrap (do this first)
-If you don't have the session `accountBrandId`, call `findings.get_visibility_brands` (no args), show names, ask/match, thread the id through.
+If you don't have the session `accountBrandId`, call `account-manager.get_brands` (no args), show names, ask/match, thread the id through.
 
 ## Which tool
 - Cross-brand comparison (engine): `findings.compare_brands` (brand).
