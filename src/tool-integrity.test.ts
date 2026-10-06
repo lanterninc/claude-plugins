@@ -145,9 +145,9 @@ describe('collectToolRefs helper', () => {
     expect(refs).toContain('findings.compare_brands');
   });
 
-  it('GIVEN text with bare explain_citation_telemetry WHEN collected THEN findings.explain_citation_telemetry is returned', () => {
-    const refs = collectToolRefs('Use explain_citation_telemetry.');
-    expect(refs).toContain('findings.explain_citation_telemetry');
+  it('GIVEN text with bare get_citation_trend WHEN collected THEN findings.get_citation_trend is returned', () => {
+    const refs = collectToolRefs('Use get_citation_trend.');
+    expect(refs).toContain('findings.get_citation_trend');
   });
 
   it('GIVEN text with a namespaced account-manager ref WHEN collected THEN only the prefixed form is returned', () => {
