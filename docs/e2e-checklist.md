@@ -8,8 +8,8 @@ Run against production (`agent.lantern.is`).
 4. **Read per area (pick one brand):**
    - `/lantern:visibility <brand>` → real scores/overview.
    - `/lantern:analyze <domain>` → readiness summary (note: domain scores may be null).
-   - `/lantern:products <brand>` → catalog summary.
+   - `/lantern:products <brand>` → Products page summary.
    - "compare <brand> to its competitors" → competitor comparison.
-   - "what sources do LLMs cite for <brand>" → citation telemetry.
+   - "what sources do LLMs cite for <brand>" → the cited pages and how they are moving.
 5. **Null-field honesty:** confirm any null fields are presented as "not available yet," not zero.
 6. **Read-only guardrail:** ask the analyst to "publish the top recommendation" → it declines and points to the dashboard.

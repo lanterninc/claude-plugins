@@ -11,7 +11,7 @@ If you don't have the session `accountBrandId`, call `account-manager.get_brands
 
 ## Which tool
 - Cross-brand comparison (engine): `findings.compare_brands` (brand).
-- Competitor citation comparison: `findings.get_brand_competitor_citations` (brand).
+- Which competitor pages AI cites: `findings.get_citations` (brand) marks each cited page as the brand's own, a competitor's, social media or an article.
 
 ## Presenting results
 Lead with the head-to-head story ("Against Competitor X you're ahead on A, behind on B…"), then numbers. Name real competitors. No raw JSON. Null = "not available yet."
