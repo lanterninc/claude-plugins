@@ -25,6 +25,8 @@ export const KNOWN_TOOLS: ReadonlyArray<string> = [
   'findings.get_product_detail',
   'findings.get_citations',
   'findings.get_citation_trend',
+  'findings.get_citations_by_channel',
+  'findings.get_citation_trend_by_channel',
   'findings.get_ai_traffic_insights',
   'findings.get_action_impact',
   'findings.get_action_metadata',
