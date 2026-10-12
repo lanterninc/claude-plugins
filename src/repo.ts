@@ -31,6 +31,8 @@ export const KNOWN_TOOLS: ReadonlyArray<string> = [
   'findings.get_action_impact',
   'findings.get_action_metadata',
   'findings.get_overview_attention',
+  'findings.get_brand_overview_trend',
+  'findings.get_brand_overview_trend_by_channel',
   'findings.get_portfolio_overview',
   'findings.get_brand_overview',
   'findings.compare_brands',
