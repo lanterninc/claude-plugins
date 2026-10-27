@@ -1,6 +1,15 @@
 import { describe, it, expect } from 'vitest';
-import { PLUGINS, loadPluginManifest } from './repo.js';
+import { existsSync, readFileSync, statSync } from 'node:fs';
+import { join } from 'node:path';
+import { PLUGINS, loadPluginManifest, repoRoot } from './repo.js';
 import { PluginManifestSchema } from './schemas.js';
+
+const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+
+/** Width and height from a PNG's IHDR chunk (always the first chunk, at byte 16). */
+function pngSize(buf: Buffer): { width: number; height: number } {
+  return { width: buf.readUInt32BE(16), height: buf.readUInt32BE(20) };
+}
 
 describe('plugin manifests', () => {
   for (const plugin of PLUGINS) {
@@ -31,6 +40,29 @@ describe('plugin manifests', () => {
         expect(parsed.description.length).toBeGreaterThan(0);
         expect(parsed.author.name.length).toBeGreaterThan(0);
       });
+
+      // Claude directory listing requirements (the submission validator checks these).
+      it(`GIVEN the manifest WHEN privacyPolicyUrl read THEN it is an https URL`, () => {
+        const parsed = PluginManifestSchema.parse(loadPluginManifest(plugin));
+        expect(parsed.privacyPolicyUrl).toMatch(/^https:\/\//);
+      });
+
+      it(`GIVEN .claude-plugin/icon.png WHEN read THEN it is a square PNG, 512-2048 px, under 2 MB`, () => {
+        const iconPath = join(repoRoot(), 'plugins', plugin, '.claude-plugin', 'icon.png');
+        expect(existsSync(iconPath), `${iconPath} is missing`).toBe(true);
+        const buf = readFileSync(iconPath);
+        expect(buf.subarray(0, 8).equals(PNG_SIGNATURE), 'icon.png is not a PNG').toBe(true);
+        const { width, height } = pngSize(buf);
+        expect(width).toBe(height);
+        expect(width).toBeGreaterThanOrEqual(512);
+        expect(width).toBeLessThanOrEqual(2048);
+        expect(statSync(iconPath).size).toBeLessThan(2 * 1024 * 1024);
+      });
+
+      it(`GIVEN README.md WHEN words counted THEN there are at least 40`, () => {
+        const readme = readFileSync(join(repoRoot(), 'plugins', plugin, 'README.md'), 'utf-8');
+        expect(readme.split(/\s+/).filter(Boolean).length).toBeGreaterThanOrEqual(40);
+      });
     });
   }
 
@@ -40,6 +72,7 @@ describe('plugin manifests', () => {
       description: 'test',
       version: 'not-semver',
       author: { name: 'X', url: 'https://x.com' },
+      privacyPolicyUrl: 'https://x.com/privacy',
       license: 'MIT',
     });
     expect(result.success).toBe(false);
@@ -51,6 +84,7 @@ describe('plugin manifests', () => {
       description: 'test',
       version: '1.0.0',
       author: { name: 'X', url: 'https://x.com' },
+      privacyPolicyUrl: 'https://x.com/privacy',
     });
     expect(result.success).toBe(false);
   });
@@ -61,6 +95,7 @@ describe('plugin manifests', () => {
       description: '',
       version: '1.0.0',
       author: { name: 'X', url: 'https://x.com' },
+      privacyPolicyUrl: 'https://x.com/privacy',
       license: 'MIT',
     });
     expect(result.success).toBe(false);

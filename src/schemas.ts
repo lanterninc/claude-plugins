@@ -38,6 +38,8 @@ export const PluginManifestSchema = z.object({
     url: z.string().url(),
   }),
   homepage: z.string().url().optional(),
+  // Required for a Claude directory listing (the submission validator flags it).
+  privacyPolicyUrl: z.string().url(),
   repository: z.string().optional(),
   license: z.string().min(1),
 });

@@ -68,6 +68,7 @@ describe('PluginManifestSchema', () => {
     description: 'A plugin',
     version: '1.2.3',
     author: { name: 'Lantern', url: 'https://lantern.is' },
+    privacyPolicyUrl: 'https://lantern.is/privacy',
     license: 'MIT',
   };
 
@@ -104,6 +105,17 @@ describe('PluginManifestSchema', () => {
 
   it('GIVEN a manifest with bad homepage url WHEN parsed THEN fails', () => {
     const result = PluginManifestSchema.safeParse({ ...validManifest, homepage: 'not-a-url' });
+    expect(result.success).toBe(false);
+  });
+
+  it('GIVEN a manifest without privacyPolicyUrl WHEN parsed THEN fails', () => {
+    const manifest: Partial<typeof validManifest> = { ...validManifest };
+    delete manifest.privacyPolicyUrl;
+    expect(PluginManifestSchema.safeParse(manifest).success).toBe(false);
+  });
+
+  it('GIVEN a manifest with bad privacyPolicyUrl WHEN parsed THEN fails', () => {
+    const result = PluginManifestSchema.safeParse({ ...validManifest, privacyPolicyUrl: 'privacy' });
     expect(result.success).toBe(false);
   });
 });
