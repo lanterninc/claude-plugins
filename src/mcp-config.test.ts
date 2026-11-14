@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { PLUGINS, loadMcpConfig } from './repo.js';
-import { McpConfigSchema } from './schemas.js';
+import { McpConfigSchema, isFixedPublicUrl, mcpDefaultUrl } from './schemas.js';
 
 describe('mcp config files', () => {
   for (const plugin of PLUGINS) {
@@ -22,43 +22,28 @@ describe('mcp config files', () => {
         expect(parsed.mcpServers.lantern.type).toBe('http');
       });
 
-      it(`GIVEN the lantern server url WHEN examined THEN it uses the LANTERN_MCP_URL env-var form`, () => {
-        const parsed = McpConfigSchema.parse(loadMcpConfig(plugin));
-        expect(parsed.mcpServers.lantern.url).toMatch(/^\$\{LANTERN_MCP_URL:-https?:\/\/.+\}$/);
-      });
-
       it(`GIVEN the lantern server url WHEN default path examined THEN it ends with /agent/mcp`, () => {
         const parsed = McpConfigSchema.parse(loadMcpConfig(plugin));
-        // Extract the default URL from ${LANTERN_MCP_URL:-<url>}
-        const match = /\$\{LANTERN_MCP_URL:-(.+)\}$/.exec(parsed.mcpServers.lantern.url);
-        expect(match).not.toBeNull();
-        const defaultUrl = match?.[1] ?? '';
-        expect(defaultUrl.endsWith('/agent/mcp')).toBe(true);
+        expect(mcpDefaultUrl(parsed.mcpServers.lantern.url).endsWith('/agent/mcp')).toBe(true);
       });
     });
   }
 
+  // The public plugin is the one submitted to the Claude directory, which
+  // refuses a url with a ${...} variable, a user name or non-ASCII letters.
   it.runIf(PLUGINS.includes('lantern'))(
-    'GIVEN the lantern plugin WHEN default host parsed THEN it is exactly agent.lantern.is',
+    'GIVEN the lantern plugin WHEN its url is read THEN it is the fixed public url on agent.lantern.is',
     () => {
-      const parsed = McpConfigSchema.parse(loadMcpConfig('lantern'));
-      const match = /\$\{LANTERN_MCP_URL:-(.+)\}$/.exec(parsed.mcpServers.lantern.url);
-      const defaultUrl = match?.[1] ?? '';
-      expect(new URL(defaultUrl).host).toBe('agent.lantern.is');
+      const { url } = McpConfigSchema.parse(loadMcpConfig('lantern')).mcpServers.lantern;
+      expect(isFixedPublicUrl(url), `${url} is not a fixed public url`).toBe(true);
+      expect(new URL(url).host).toBe('agent.lantern.is');
     },
   );
-
-  it('GIVEN a config with a plain (non-env-var) url WHEN parsed THEN the schema rejects it', () => {
-    const result = McpConfigSchema.safeParse({
-      mcpServers: { lantern: { type: 'http', url: 'https://agent.lantern.is/agent/mcp' } },
-    });
-    expect(result.success).toBe(false);
-  });
 
   it('GIVEN a config with type stdio WHEN parsed THEN the schema rejects it', () => {
     const result = McpConfigSchema.safeParse({
       mcpServers: {
-        lantern: { type: 'stdio', url: '${LANTERN_MCP_URL:-https://agent.lantern.is/agent/mcp}' },
+        lantern: { type: 'stdio', url: 'https://agent.lantern.is/agent/mcp' },
       },
     });
     expect(result.success).toBe(false);

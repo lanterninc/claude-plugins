@@ -6,6 +6,8 @@ import {
   FrontmatterSchema,
   MarketplacePluginEntrySchema,
   McpServerSchema,
+  isFixedPublicUrl,
+  mcpDefaultUrl,
 } from './schemas.js';
 
 describe('MarketplacePluginEntrySchema', () => {
@@ -150,12 +152,40 @@ describe('McpServerSchema', () => {
     expect(result.success).toBe(true);
   });
 
-  it('GIVEN a server with plain url WHEN parsed THEN fails', () => {
+  it('GIVEN a server with a fixed https url WHEN parsed THEN succeeds', () => {
     const result = McpServerSchema.safeParse({
       type: 'http',
       url: 'https://agent.lantern.is/agent/mcp',
     });
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
+  });
+
+  // The Claude directory refuses a url it can't read for certain: a ${...}
+  // variable other than our env form, a user name, a letter outside ASCII.
+  it.each([
+    ['another ${...} variable', '${OTHER_URL:-https://agent.lantern.is/agent/mcp}'],
+    ['a bare ${...} variable', '${LANTERN_MCP_URL}'],
+    ['a ${...} inside a fixed url', 'https://${HOST}/agent/mcp'],
+    ['a user name', 'https://user@agent.lantern.is/agent/mcp'],
+    ['a letter outside ASCII', 'https://agént.lantern.is/agent/mcp'],
+    ['plain http', 'http://agent.lantern.is/agent/mcp'],
+    ['no scheme', 'agent.lantern.is/agent/mcp'],
+  ])('GIVEN a server url with %s WHEN parsed THEN fails', (_label, url) => {
+    expect(McpServerSchema.safeParse({ type: 'http', url }).success).toBe(false);
+  });
+
+  it('GIVEN isFixedPublicUrl WHEN checked THEN only a plain-ASCII https url with no ${...} or user name passes', () => {
+    expect(isFixedPublicUrl('https://agent.lantern.is/agent/mcp')).toBe(true);
+    expect(isFixedPublicUrl('${LANTERN_MCP_URL:-https://agent.lantern.is/agent/mcp}')).toBe(false);
+    expect(isFixedPublicUrl('https://user:pw@agent.lantern.is/agent/mcp')).toBe(false);
+    expect(isFixedPublicUrl('https://agent.lantern.is/agent/mcp ')).toBe(false);
+  });
+
+  it('GIVEN mcpDefaultUrl WHEN given either form THEN it returns the url the server connects to by default', () => {
+    expect(mcpDefaultUrl('${LANTERN_MCP_URL:-https://agent.lantern.is/agent/mcp}')).toBe(
+      'https://agent.lantern.is/agent/mcp',
+    );
+    expect(mcpDefaultUrl('https://agent.lantern.is/agent/mcp')).toBe('https://agent.lantern.is/agent/mcp');
   });
 
   it('GIVEN a server with an oauth.scopes string WHEN parsed THEN succeeds', () => {
