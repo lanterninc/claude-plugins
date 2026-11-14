@@ -1,4 +1,4 @@
-# lantern
+# Lantern: Agentic Sales
 
 Lantern measures how AI assistants talk about your brand. This plugin brings
 that data into Claude Code: how visible your brand is in AI answers, which
@@ -11,7 +11,11 @@ edits or applies anything in your Lantern account.
 ## Setup
 
 1. You need a Lantern account (https://lantern.is) with access to at least one brand.
-2. Install the plugin:
+2. Install the plugin (Claude Code 2.1.275 or later):
+   ```
+   /plugin install lantern --marketplace lanterninc/claude-plugins
+   ```
+   On older versions, add the marketplace first:
    ```bash
    claude plugin marketplace add lanterninc/claude-plugins
    /plugin install lantern
