@@ -2,7 +2,7 @@
   "name": "lantern",
   "displayName": "Lantern: Agentic Sales",
   "description": "Bring Lantern's AI-visibility, citations, product data quality, and website AI-readiness analysis into Claude Code. Pick a brand and ask.",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "author": {
     "name": "Lantern",
     "url": "https://lantern.is"
