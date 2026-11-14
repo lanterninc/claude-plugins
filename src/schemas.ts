@@ -31,6 +31,9 @@ const SEMVER_RE = /^\d+\.\d+\.\d+(-[\w.]+)?(\+[\w.]+)?$/;
 
 export const PluginManifestSchema = z.object({
   name: z.string().min(1),
+  // The name the Claude directory lists the plugin under. Unlike `name` it may
+  // contain spaces, any casing and punctuation (e.g. "Lantern: Agentic Sales").
+  displayName: z.string().trim().min(1).optional(),
   description: z.string().min(1),
   version: z.string().regex(SEMVER_RE, 'version must be a semver string (e.g. 1.2.3)'),
   author: z.object({

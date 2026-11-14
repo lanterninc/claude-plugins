@@ -103,6 +103,19 @@ describe('PluginManifestSchema', () => {
     expect(result.success).toBe(true);
   });
 
+  it('GIVEN a manifest with a displayName containing spaces and a colon WHEN parsed THEN succeeds', () => {
+    const result = PluginManifestSchema.safeParse({
+      ...validManifest,
+      displayName: 'Lantern: Agentic Sales',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('GIVEN a manifest with a blank displayName WHEN parsed THEN fails', () => {
+    const result = PluginManifestSchema.safeParse({ ...validManifest, displayName: '  ' });
+    expect(result.success).toBe(false);
+  });
+
   it('GIVEN a manifest with bad homepage url WHEN parsed THEN fails', () => {
     const result = PluginManifestSchema.safeParse({ ...validManifest, homepage: 'not-a-url' });
     expect(result.success).toBe(false);
